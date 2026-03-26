@@ -80,6 +80,7 @@ jobs:
           -r win-x64
           -p:Version=${{ env.VERSION }}
           -p:IlcUseEnvironmentalTools=true
+          -o publish
 
       - name: Install WiX Toolset
         run: dotnet tool install --global wix
@@ -89,7 +90,7 @@ jobs:
           wix build
           installer/DefinitionsHelper.Installer/Package.wxs
           -o DefinitionsHelper-v${{ env.VERSION }}.msi
-          -d PublishDir=${{ github.workspace }}/src/DefinitionsHelper/bin/Release/net9.0-windows/win-x64/publish
+          -d PublishDir=${{ github.workspace }}/publish
           -d AssetsDir=${{ github.workspace }}/assets
           -arch x64
 

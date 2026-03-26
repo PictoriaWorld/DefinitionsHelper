@@ -73,12 +73,10 @@ dotnet test
 Publishing requires the MSVC linker. From a Developer Command Prompt for Visual Studio:
 
 ```
-dotnet publish src/DefinitionsHelper -c Release -r win-x64 -p:IlcUseEnvironmentalTools=true
+dotnet publish src/DefinitionsHelper -c Release -r win-x64 -p:IlcUseEnvironmentalTools=true -o publish
 ```
 
-The output is at `src/DefinitionsHelper/bin/Release/net9.0-windows/win-x64/publish/`.
-
-Copy `assets/pictoria_structure.ico` next to the published DLL before registering.
+Copy `assets/pictoria_structure.ico` into the `publish/` folder before registering.
 
 ### Manual Registration
 
