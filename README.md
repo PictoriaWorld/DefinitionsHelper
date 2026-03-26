@@ -14,9 +14,9 @@ File type icons (details/list view):
 
 1. Download the latest `.msi` installer from the [Releases](https://github.com/PictoriaWorld/DefinitionsHelper/releases) page.
 
-2. Run the installer.
+2. Run the installer. Close and reopen any open File Explorer windows.
 
-3. Open Windows Explorer and navigate to a folder containing `.pstr` files. Switch to medium, large, or extra large icons view to see the thumbnails.
+3. Navigate to a folder containing `.pstr` files. Switch to medium, large, or extra large icons view to see the thumbnails.
 
 ## Overview
 
