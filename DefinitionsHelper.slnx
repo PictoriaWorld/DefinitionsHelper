@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DefinitionsHelper/DefinitionsHelper.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DefinitionsHelper.Tests/DefinitionsHelper.Tests.csproj" />
+  </Folder>
+  <Folder Name="/installer/">
+    <Project Path="installer/DefinitionsHelper.Installer/DefinitionsHelper.Installer.wixproj" />
+  </Folder>
+  <Folder Name="/.github/">
+    <File Path=".github/workflows/release.yml" />
+  </Folder>
+  <Folder Name="/assets/">
+    <File Path="assets/pictoria_structure.ico" />
+  </Folder>
+  <File Path="CHANGELOG.md" />
+  <File Path=".gitignore" />
+</Solution>

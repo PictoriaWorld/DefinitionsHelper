@@ -1,0 +1,122 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      notes: ${{ steps.notes.outputs.notes }}
+      skip: ${{ steps.check-tag.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from CHANGELOG.md
+        id: version
+        run: |
+          version=$(grep -m1 -oP '## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md)
+          if [ -z "$version" ]; then
+            echo "No version heading found in CHANGELOG.md"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $version"
+
+      - name: Extract release notes
+        id: notes
+        run: |
+          notes=$(awk '/^## \[/{if(found) exit; found=1; next} found' CHANGELOG.md)
+          {
+            echo "notes<<NOTES_EOF"
+            echo "$notes"
+            echo "NOTES_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Check if tag already exists
+        id: check-tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Tag v${{ steps.version.outputs.version }} already exists - skipping release."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: check-version
+    if: needs.check-version.outputs.skip == 'false'
+    runs-on: windows-latest
+    env:
+      VERSION: ${{ needs.check-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Run tests
+        run: dotnet test tests/DefinitionsHelper.Tests --no-restore
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Publish NativeAOT DLL
+        run: >
+          dotnet publish src/DefinitionsHelper
+          -c Release
+          -r win-x64
+          -p:Version=${{ env.VERSION }}
+          -p:IlcUseEnvironmentalTools=true
+
+      - name: Install WiX Toolset
+        run: dotnet tool install --global wix
+
+      - name: Build MSI
+        run: >
+          wix build
+          installer/DefinitionsHelper.Installer/Package.wxs
+          -o DefinitionsHelper-v${{ env.VERSION }}.msi
+          -d PublishDir=${{ github.workspace }}/src/DefinitionsHelper/bin/Release/net9.0-windows/win-x64/publish
+          -d AssetsDir=${{ github.workspace }}/assets
+          -arch x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: msi-installer
+          path: "*.msi"
+
+  create-github-release:
+    needs: [check-version, build]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.check-version.outputs.version }}
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create release and upload assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_NOTES: ${{ needs.check-version.outputs.notes }}
+        run: |
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes "$RELEASE_NOTES" \
+            artifacts/*/*.msi

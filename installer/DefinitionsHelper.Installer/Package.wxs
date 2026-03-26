@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <!-- Version is injected at build time via /p:Version -->
+  <Package Name="Pictoria Definitions Helper"
+           Manufacturer="Pictoria"
+           Version="!(bind.FileVersion.MainDll)"
+           UpgradeCode="f47ac10b-58cc-4372-a567-0e02b2c3d479"
+           Compressed="yes"
+           InstallerVersion="500">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Install directory -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="DefinitionsHelper">
+
+        <Component Id="MainDllComponent" Guid="b1c2d3e4-f5a6-7890-bcde-f12345678901" Bitness="always64">
+          <File Id="MainDll"
+                Source="$(var.PublishDir)\DefinitionsHelper.dll"
+                KeyPath="yes" />
+        </Component>
+
+        <Component Id="IconComponent" Guid="c2d3e4f5-a6b7-8901-cdef-123456789012" Bitness="always64">
+          <File Id="IconFile"
+                Source="$(var.AssetsDir)\pictoria_structure.ico"
+                KeyPath="yes" />
+        </Component>
+
+      </Directory>
+    </StandardDirectory>
+
+    <!-- COM Registration -->
+    <Component Id="ComRegistration" Directory="INSTALLFOLDER" Guid="d3e4f5a6-b7c8-9012-defa-234567890123" Bitness="always64">
+      <RegistryKey Root="HKLM" Key="SOFTWARE\Classes\CLSID\{a1b2c3d4-e5f6-7890-abcd-ef1234567890}">
+        <RegistryValue Type="string" Value="Pictoria Definition Thumbnail Provider" />
+        <RegistryKey Key="InprocServer32">
+          <RegistryValue Type="string" Value="[INSTALLFOLDER]DefinitionsHelper.dll" />
+          <RegistryValue Type="string" Name="ThreadingModel" Value="Apartment" />
+        </RegistryKey>
+      </RegistryKey>
+    </Component>
+
+    <!-- .pstr File Type Association -->
+    <Component Id="PstrFileAssociation" Directory="INSTALLFOLDER" Guid="e4f5a6b7-c8d9-0123-efab-345678901234" Bitness="always64">
+      <RegistryKey Root="HKLM" Key="SOFTWARE\Classes\.pstr">
+        <RegistryValue Type="string" Value="PictoriaStructureDefinition" />
+      </RegistryKey>
+      <RegistryKey Root="HKLM" Key="SOFTWARE\Classes\PictoriaStructureDefinition">
+        <RegistryValue Type="string" Value="Pictoria Structure Definition" />
+        <RegistryKey Key="DefaultIcon">
+          <RegistryValue Type="string" Value="[INSTALLFOLDER]pictoria_structure.ico" />
+        </RegistryKey>
+      </RegistryKey>
+      <RegistryKey Root="HKLM" Key="SOFTWARE\Classes\.pstr\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
+        <RegistryValue Type="string" Value="{a1b2c3d4-e5f6-7890-abcd-ef1234567890}" />
+      </RegistryKey>
+    </Component>
+
+    <!-- .ppty File Type Association -->
+    <Component Id="PptyFileAssociation" Directory="INSTALLFOLDER" Guid="a6b7c8d9-e0f1-2345-abcd-567890123456" Bitness="always64">
+      <RegistryKey Root="HKLM" Key="SOFTWARE\Classes\.ppty">
+        <RegistryValue Type="string" Value="PictoriaPropertyDefinition" />
+      </RegistryKey>
+      <RegistryKey Root="HKLM" Key="SOFTWARE\Classes\PictoriaPropertyDefinition">
+        <RegistryValue Type="string" Value="Pictoria Property Definition" />
+        <RegistryKey Key="DefaultIcon">
+          <RegistryValue Type="string" Value="[INSTALLFOLDER]pictoria_structure.ico" />
+        </RegistryKey>
+      </RegistryKey>
+    </Component>
+
+    <!-- Notify shell of association change on install/uninstall -->
+    <Component Id="ShellNotify" Directory="INSTALLFOLDER" Guid="f5a6b7c8-d9e0-1234-fabc-456789012345" Bitness="always64">
+      <RegistryValue Root="HKLM"
+                     Key="SOFTWARE\DefinitionsHelper"
+                     Name="Installed"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+
+    <Feature Id="ProductFeature" Title="Pictoria Definitions Helper" Level="1">
+      <ComponentRef Id="MainDllComponent" />
+      <ComponentRef Id="IconComponent" />
+      <ComponentRef Id="ComRegistration" />
+      <ComponentRef Id="PstrFileAssociation" />
+      <ComponentRef Id="PptyFileAssociation" />
+      <ComponentRef Id="ShellNotify" />
+    </Feature>
+
+  </Package>
+</Wix>
