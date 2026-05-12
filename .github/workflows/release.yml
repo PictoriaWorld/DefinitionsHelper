@@ -83,7 +83,7 @@ jobs:
           -o publish
 
       - name: Install WiX Toolset
-        run: dotnet tool install --global wix
+        run: dotnet tool install --global wix --version 5.0.2
 
       - name: Build MSI
         run: >
