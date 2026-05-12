@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.1] - 12-05-2026
+
+### Fixed
+- `.pstr` thumbnails now match the sizing behavior of their sibling `_preview.png` thumbnails in Windows Explorer.
+
 ## [1.0.0] - 25-03-2026
 
 ### Added
