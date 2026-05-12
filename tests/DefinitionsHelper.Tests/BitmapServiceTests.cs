@@ -30,7 +30,7 @@ public class BitmapServiceTests
 
         Assert.Equal(35, placement.X);
         Assert.Equal(30, placement.Y);
-        Assert.Equal(26, placement.Width);
-        Assert.Equal(36, placement.Height);
+        Assert.Equal(25, placement.Width);
+        Assert.Equal(35, placement.Height);
     }
 }

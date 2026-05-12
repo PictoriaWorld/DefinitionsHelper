@@ -12,6 +12,7 @@ namespace DefinitionsHelper.Imaging;
 internal static partial class BitmapService
 {
     private const int Ok = 0;
+    private const int CanvasArtworkCompensationPixels = 1;
 
     /// <summary>
     /// Creates a Windows bitmap handle from PNG bytes, scaled to fit within the requested size
@@ -140,9 +141,25 @@ internal static partial class BitmapService
         uint canvasSize)
     {
         var imageSize = CalculateThumbnailSize(originalWidth, originalHeight, canvasSize);
+        imageSize = ApplyCanvasArtworkCompensation(imageSize.Width, imageSize.Height);
         int size = (int)canvasSize;
 
         return ((size - imageSize.Width) / 2, (size - imageSize.Height) / 2, imageSize.Width, imageSize.Height);
+    }
+
+    private static (int Width, int Height) ApplyCanvasArtworkCompensation(int width, int height)
+    {
+        int longestSide = Math.Max(width, height);
+        if (longestSide <= CanvasArtworkCompensationPixels + 1)
+        {
+            return (width, height);
+        }
+
+        float scale = (float)(longestSide - CanvasArtworkCompensationPixels) / longestSide;
+        int adjustedWidth = Math.Max((int)Math.Round(width * scale), 1);
+        int adjustedHeight = Math.Max((int)Math.Round(height * scale), 1);
+
+        return (adjustedWidth, adjustedHeight);
     }
 
     private const int PixelFormat32bppARGB = 0x0026200A;
