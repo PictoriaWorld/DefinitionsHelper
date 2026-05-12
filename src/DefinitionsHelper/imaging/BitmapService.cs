@@ -17,8 +17,9 @@ internal static partial class BitmapService
     /// Creates a Windows bitmap handle from PNG bytes, scaled to fit within the requested size
     /// while maintaining aspect ratio. Optionally overlays a logo icon at the bottom-right corner.
     ///
-    /// Produces an aspect-ratio bitmap no larger than the requested size, matching Windows'
-    /// thumbnail behavior for the sibling preview PNG files.
+    /// Produces a square thumbnail canvas with the image centered, matching Windows'
+    /// sizing behavior for the sibling preview PNG files while keeping the overlay in
+    /// a consistent bottom-right canvas position.
     /// Returns 0 on failure.
     /// </summary>
     public static nint CreateBitmapFromPng(byte[] pngBytes, uint maxThumbnailSize, string? overlayIconPath = null)
@@ -53,11 +54,12 @@ internal static partial class BitmapService
             status = GdipGetImageHeight(sourceBitmap, out uint originalHeight);
             if (status != Ok) return 0;
 
-            var thumbnailSize = CalculateThumbnailSize(originalWidth, originalHeight, maxThumbnailSize);
+            int canvasSize = (int)maxThumbnailSize;
+            var placement = CalculateCenteredImagePlacement(originalWidth, originalHeight, maxThumbnailSize);
 
             status = GdipCreateBitmapFromScan0(
-                thumbnailSize.Width,
-                thumbnailSize.Height,
+                canvasSize,
+                canvasSize,
                 0,
                 PixelFormat32bppARGB,
                 0,
@@ -72,22 +74,22 @@ internal static partial class BitmapService
             status = GdipDrawImageRectI(
                 thumbnailGraphics,
                 sourceBitmap,
-                0,
-                0,
-                thumbnailSize.Width,
-                thumbnailSize.Height);
+                placement.X,
+                placement.Y,
+                placement.Width,
+                placement.Height);
             if (status != Ok) return 0;
 
-            // Overlay logo at bottom-right of the thumbnail.
+            // Overlay logo at bottom-right of the canvas, not the artwork.
             if (overlayIconPath != null)
             {
                 status = GdipLoadImageFromFile(overlayIconPath, out overlayImage);
                 if (status == Ok)
                 {
-                    int logoSize = Math.Max(Math.Max(thumbnailSize.Width, thumbnailSize.Height) * 25 / 100, 16);
-                    int margin = Math.Max(Math.Max(thumbnailSize.Width, thumbnailSize.Height) * 3 / 100, 1);
-                    int logoX = thumbnailSize.Width - logoSize - margin;
-                    int logoY = thumbnailSize.Height - logoSize - margin;
+                    int logoSize = Math.Max(canvasSize * 25 / 100, 16);
+                    int margin = Math.Max(canvasSize * 3 / 100, 1);
+                    int logoX = canvasSize - logoSize - margin;
+                    int logoY = canvasSize - logoSize - margin;
 
                     GdipDrawImageRectI(thumbnailGraphics, overlayImage, logoX, logoY, logoSize, logoSize);
                 }
@@ -130,6 +132,17 @@ internal static partial class BitmapService
         int scaledHeight = Math.Max((int)Math.Round(originalHeight * scale), 1);
 
         return (scaledWidth, scaledHeight);
+    }
+
+    internal static (int X, int Y, int Width, int Height) CalculateCenteredImagePlacement(
+        uint originalWidth,
+        uint originalHeight,
+        uint canvasSize)
+    {
+        var imageSize = CalculateThumbnailSize(originalWidth, originalHeight, canvasSize);
+        int size = (int)canvasSize;
+
+        return ((size - imageSize.Width) / 2, (size - imageSize.Height) / 2, imageSize.Width, imageSize.Height);
     }
 
     private const int PixelFormat32bppARGB = 0x0026200A;

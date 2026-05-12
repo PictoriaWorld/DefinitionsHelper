@@ -22,4 +22,15 @@ public class BitmapServiceTests
         Assert.Equal(expectedWidth, size.Width);
         Assert.Equal(expectedHeight, size.Height);
     }
+
+    [Fact]
+    public void CalculateCenteredImagePlacement_CentersSmallImagesInFullCanvas()
+    {
+        var placement = BitmapService.CalculateCenteredImagePlacement(26, 36, 96);
+
+        Assert.Equal(35, placement.X);
+        Assert.Equal(30, placement.Y);
+        Assert.Equal(26, placement.Width);
+        Assert.Equal(36, placement.Height);
+    }
 }

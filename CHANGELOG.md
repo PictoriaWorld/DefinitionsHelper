@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.3] - 12-05-2026
+
+### Fixed
+- `.pstr` thumbnails keep the Pictoria badge anchored to the thumbnail canvas instead of covering very small preview images.
+
 ## [1.0.2] - 12-05-2026
 
 ### Fixed
