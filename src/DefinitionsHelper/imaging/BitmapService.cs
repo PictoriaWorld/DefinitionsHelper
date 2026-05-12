@@ -120,9 +120,11 @@ internal static partial class BitmapService
     {
         int maxSize = (int)maxThumbnailSize;
 
-        // Match Explorer's scaled PNG thumbnail behavior: fit the artwork tightly to the
-        // requested size while preserving aspect ratio, without adding transparent padding.
+        // Match Explorer's normal PNG thumbnail behavior: shrink large images to the
+        // requested size, keep small preview images at their native size, and avoid
+        // adding transparent padding around the artwork.
         float scale = Math.Min((float)maxSize / originalWidth, (float)maxSize / originalHeight);
+        if (scale > 1.0f) scale = 1.0f;
 
         int scaledWidth = Math.Max((int)Math.Round(originalWidth * scale), 1);
         int scaledHeight = Math.Max((int)Math.Round(originalHeight * scale), 1);

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.2] - 12-05-2026
+
+### Fixed
+- Small `.pstr` thumbnails no longer upscale beyond the size of the embedded preview image.
+
 ## [1.0.1] - 12-05-2026
 
 ### Fixed
